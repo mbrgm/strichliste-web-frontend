@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, useHistory } from 'react-router-dom';
 
 import { useFilteredUsers } from '../../../../store';
 import { startLoadingUsers } from '../../../../store/reducers';
@@ -26,6 +26,8 @@ export const User = (props: UserProps) => {
   useEffect(() => {
     startLoadingUsers(dispatch);
   }, [props.isActive, dispatch]);
+
+  useAllowJumpingToUserByKeyboard();
 
   return (
     <>
@@ -55,4 +57,43 @@ export const User = (props: UserProps) => {
       </div>
     </>
   );
+};
+
+const useAllowJumpingToUserByKeyboard = () => {
+  const [typedUserId, setTypedUserId] = React.useState('');
+
+  const history = useHistory();
+
+  const keyDownHandler = React.useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        const targetRoute = `/user/${typedUserId}`;
+        setTypedUserId('');
+        history.push(targetRoute);
+        return;
+      }
+
+      if (e.key === 'Backspace') {
+        setTypedUserId(typedUserId.slice(0, -1));
+        return;
+      }
+
+      const isPrintableKey = e.key.length === 1;
+
+      if (!isPrintableKey) {
+        return;
+      }
+
+      setTypedUserId(typedUserId + e.key);
+    },
+    [history, typedUserId]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', keyDownHandler);
+    // Remove event listeners on cleanup
+    return () => {
+      window.removeEventListener('keydown', keyDownHandler);
+    };
+  }, [keyDownHandler, typedUserId]);
 };
