@@ -90,10 +90,10 @@ const useAllowJumpingToUserByKeyboard = () => {
   );
 
   useEffect(() => {
-    window.addEventListener('keydown', keyDownHandler);
+    document.addEventListener('keydown', keyDownHandler);
     // Remove event listeners on cleanup
     return () => {
-      window.removeEventListener('keydown', keyDownHandler);
+      document.removeEventListener('keydown', keyDownHandler);
     };
   }, [keyDownHandler, typedUserId]);
 };
